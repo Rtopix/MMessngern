@@ -19,7 +19,7 @@
 
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background: #c5d4dd;
+            background: linear-gradient(180deg, #c5d4dd 0%, #8b9ea8 100%);
             min-height: 100vh;
             overflow: hidden;
             position: relative;
@@ -571,6 +571,180 @@
             transform: scale(0.97);
             box-shadow: 0 1px 2px rgba(0,0,0,0.4) inset;
         }
+
+        .search-results {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+            border: 1px solid #b0bec5;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .search-result-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .search-result-item:hover {
+            background: #f5f5f5;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-result-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #64b5f6 0%, #1976d2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .search-result-info {
+            flex: 1;
+        }
+
+        .search-result-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .search-result-key {
+            font-size: 12px;
+            color: #666;
+            font-family: 'Courier New', monospace;
+        }
+
+        .add-friend-btn {
+            background: linear-gradient(180deg, #81c784 0%, #4caf50 50%, #388e3c 51%, #2e7d32 100%);
+            border: 1px solid #1b5e20;
+            border-radius: 6px;
+            padding: 6px 12px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 2px 4px rgba(0,0,0,0.3);
+            cursor: pointer;
+        }
+
+        .add-friend-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.4) inset;
+        }
+
+        .typing-indicator {
+            padding: 8px 15px;
+            font-style: italic;
+            color: #666;
+            font-size: 14px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 10px;
+            margin: 5px 0;
+            display: none;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .friends-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+            border: 1px solid #b0bec5;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .friend-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background-color 0.2s;
+        }
+
+        .friend-item:hover {
+            background: #f5f5f5;
+        }
+
+        .friend-item:last-child {
+            border-bottom: none;
+        }
+
+        .friend-info {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .friend-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #64b5f6 0%, #1976d2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .friend-details {
+            flex: 1;
+        }
+
+        .friend-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .friend-status {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .friend-status.online {
+            color: #4caf50;
+        }
+
+        .chat-btn {
+            background: linear-gradient(180deg, #5cadde 0%, #2e88c4 50%, #1976b8 51%, #1565a6 100%);
+            border: 1px solid #0d47a1;
+            border-radius: 6px;
+            padding: 6px 12px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 2px 4px rgba(0,0,0,0.3);
+            cursor: pointer;
+        }
+
+        .chat-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.4) inset;
+        }
     </style>
 </head>
 <body>
@@ -590,7 +764,10 @@
         <div class="navbar">
             <button class="nav-btn logout-btn" onclick="logout()">Выход</button>
             <div class="nav-title">Чаты</div>
-            <button class="nav-btn" onclick="showAccountModal()">👤</button>
+            <div style="display: flex; gap: 5px;">
+                <button class="nav-btn" onclick="showSearchModal()" style="font-size: 12px; padding: 4px 8px;">🔍</button>
+                <button class="nav-btn" onclick="showAccountModal()">👤</button>
+            </div>
         </div>
         <div class="content chat-list" id="chatList"></div>
         <div class="fab" onclick="showNewChatModal()">+</div>
@@ -602,7 +779,9 @@
             <div class="nav-title" id="chatTitle"></div>
             <div style="width: 70px;"></div>
         </div>
-        <div class="content messages-container" id="messagesContainer"></div>
+        <div class="content messages-container" id="messagesContainer">
+            <div class="typing-indicator" id="typingIndicator"></div>
+        </div>
         <div class="message-input-container">
             <input type="text" class="message-input" id="messageInput" placeholder="Сообщение">
             <button class="send-btn" onclick="sendMessage()">Отправить</button>
@@ -636,34 +815,548 @@
                 </div>
             </div>
             <div class="modal-buttons">
+                <button class="modal-btn confirm" onclick="showFriendsModal()">Друзья</button>
                 <button class="modal-btn confirm" onclick="closeAccountModal()">Закрыть</button>
             </div>
         </div>
     </div>
 
+    <div class="modal" id="searchFriendsModal">
+        <div class="modal-content">
+            <div class="modal-title">Поиск друзей</div>
+            <input type="text" class="text-input" id="searchInput" placeholder="Введите ник пользователя">
+            <div class="search-results" id="searchResults"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" onclick="closeSearchModal()">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="friendsModal">
+        <div class="modal-content">
+            <div class="modal-title">Мои друзья</div>
+            <div class="friends-list" id="friendsList"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn confirm" onclick="showSearchModal()">Найти друзей</button>
+                <button class="modal-btn cancel" onclick="closeFriendsModal()">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-let currentUser='';let currentUserKey='';let currentChat=null;let chats=[];function generateUniqueKey(){const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';let result='';for(let i=0;i<16;i++){result+=chars.charAt(Math.floor(Math.random()*chars.length));}
-return result;}
-function init(){const savedKey=localStorage.getItem('mmessenger_user_key');if(savedKey){currentUserKey=savedKey;const userData=localStorage.getItem(`mmessenger_user_${savedKey}`);if(userData){const data=JSON.parse(userData);currentUser=data.username;chats=data.chats||[{id:1,name:'Избранное',type:'favorites',messages:[]}];showScreen('chatsScreen');return;}}
-showScreen('welcomeScreen');}
-function saveNickname(){const input=document.getElementById('nicknameInput');const nickname=input.value.trim();if(nickname){currentUser=nickname;currentUserKey=generateUniqueKey();localStorage.setItem('mmessenger_user_key',currentUserKey);const userData={username:nickname,chats:[{id:1,name:'Избранное',type:'favorites',messages:[]}]};localStorage.setItem(`mmessenger_user_${currentUserKey}`,JSON.stringify(userData));chats=userData.chats;renderChatList();gsap.to('#welcomeScreen',{opacity:0,duration:0.3,onComplete:()=>showScreen('chatsScreen')});}}
-function showScreen(screenId){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));const screen=document.getElementById(screenId);screen.classList.add('active');gsap.from(screen,{x:100,opacity:0,duration:0.4,ease:'power2.out'});}
-function loadChats(){if(currentUserKey){const userData=localStorage.getItem(`mmessenger_user_${currentUserKey}`);if(userData){const data=JSON.parse(userData);chats=data.chats||[{id:1,name:'Избранное',type:'favorites',messages:[]}];}}
-renderChatList();}
-function saveChats(){if(currentUserKey){const userData=localStorage.getItem(`mmessenger_user_${currentUserKey}`);if(userData){const data=JSON.parse(userData);data.chats=chats;localStorage.setItem(`mmessenger_user_${currentUserKey}`,JSON.stringify(data));}}}
-function renderChatList(){const list=document.getElementById('chatList');list.innerHTML='';chats.forEach(chat=>{const item=document.createElement('div');item.className='chat-item';const lastMsg=chat.messages[chat.messages.length-1];item.innerHTML=`<div class="chat-avatar">${chat.name[0].toUpperCase()}</div><div class="chat-info"><div class="chat-name">${chat.name}</div><div class="chat-preview">${lastMsg?lastMsg.text.substring(0,30)+'...':'Нет сообщений'}</div></div>`;item.onclick=()=>openChat(chat);list.appendChild(item);});}
-function openChat(chat){currentChat=chat;document.getElementById('chatTitle').textContent=chat.name;renderMessages();gsap.from('#chatScreen',{x:100,opacity:0,duration:0.4,ease:'power2.out'});showScreen('chatScreen');}
-function renderMessages(){const container=document.getElementById('messagesContainer');container.innerHTML='';currentChat.messages.forEach(msg=>{const msgDiv=document.createElement('div');msgDiv.className=`message ${msg.author===currentUser?'own':''}`;msgDiv.innerHTML=`${msg.author!==currentUser?`<div class="message-author">${msg.author}</div>`:''}<div class="message-bubble">${msg.text}</div><div class="message-time">${msg.time}</div>`;container.appendChild(msgDiv);gsap.from(msgDiv,{opacity:0,y:20,duration:0.3});});container.scrollTop=container.scrollHeight;}
-function sendMessage(){const input=document.getElementById('messageInput');const text=input.value.trim();if(text&&currentChat){const now=new Date();const time=`${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;currentChat.messages.push({author:currentUser,text:text,time:time});saveChats();renderMessages();input.value='';}}
-function backToChats(){renderChatList();gsap.from('#chatsScreen',{x:-100,opacity:0,duration:0.4,ease:'power2.out'});showScreen('chatsScreen');}
-function showNewChatModal(){const modal=document.getElementById('newChatModal');modal.classList.add('active');gsap.from('.modal-content',{scale:0.8,opacity:0,duration:0.3,ease:'back.out'});}
-function closeModal(){document.getElementById('newChatModal').classList.remove('active');document.getElementById('newChatName').value='';document.getElementById('newChatDescription').value='';}
-function showAccountModal(){const modal=document.getElementById('accountModal');document.getElementById('accountUsername').textContent=currentUser;document.getElementById('accountKey').textContent=currentUserKey;modal.classList.add('active');gsap.from('.modal-content',{scale:0.8,opacity:0,duration:0.3,ease:'back.out'});}
-function closeAccountModal(){document.getElementById('accountModal').classList.remove('active');}
-function copyKey(){navigator.clipboard.writeText(currentUserKey).then(()=>{const btn=document.querySelector('.copy-btn');const originalText=btn.textContent;btn.textContent='Скопировано!';btn.style.background='linear-gradient(180deg, #4caf50 0%, #2e7d32 100%)';setTimeout(()=>{btn.textContent=originalText;btn.style.background='linear-gradient(180deg, #81c784 0%, #4caf50 50%, #388e3c 51%, #2e7d32 100%)';},2000);});}
-function logout(){localStorage.removeItem('mmessenger_user_key');currentUser='';currentUserKey='';chats=[];showScreen('welcomeScreen');}
-function createChat(){const input=document.getElementById('newChatName');const name=input.value.trim();if(name){const newChat={id:Date.now(),name:name,messages:[]};chats.push(newChat);saveChats();renderChatList();closeModal();}}
-document.getElementById('messageInput').addEventListener('keypress',(e)=>{if(e.key==='Enter')sendMessage();});document.getElementById('nicknameInput').addEventListener('keypress',(e)=>{if(e.key==='Enter')saveNickname();});document.getElementById('newChatName').addEventListener('keypress',(e)=>{if(e.key==='Enter')createChat();});init();
-</script>
+        /*
+        MMessenger - Полнофункциональный мессенджер
+        
+        НОВЫЕ ВОЗМОЖНОСТИ:
+        1. Поиск друзей по нику:
+           - Нажмите кнопку 🔍 в главном меню или перейдите в "Друзья" через аккаунт
+           - Введите ник пользователя для поиска
+           - Добавьте найденных пользователей в друзья
+        
+        2. Индикатор печати:
+           - Показывается когда вы печатаете сообщение
+           - Симулирует получение индикатора от собеседника
+           - Автоматически исчезает через 1 секунду после остановки печати
+        
+        3. Приватные чаты с друзьями:
+           - Создаются автоматически при начале чата с другом
+           - Отображаются с иконкой 👤 в списке чатов
+           - Поддерживают индикатор печати
+        
+        4. Улучшенный интерфейс:
+           - Быстрый доступ к поиску друзей
+           - Визуальные индикаторы типа чата
+           - Анимации и переходы
+        */
+        
+        let currentUser = '';
+        let currentUserKey = '';
+        let currentChat = null;
+        let chats = [];
+        let friends = [];
+        let typingTimeout = null;
+        let isTyping = false;
+
+        function generateUniqueKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < 16; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function init() {
+            const savedKey = localStorage.getItem('mmessenger_user_key');
+            if (savedKey) {
+                currentUserKey = savedKey;
+                const userData = localStorage.getItem(`mmessenger_user_${savedKey}`);
+                if (userData) {
+                    const data = JSON.parse(userData);
+                    currentUser = data.username;
+                    chats = data.chats || [{id: 1, name: 'Избранное', type: 'favorites', messages: []}];
+                    friends = data.friends || [];
+                    showScreen('chatsScreen');
+                    return;
+                }
+            }
+            showScreen('welcomeScreen');
+        }
+
+        function saveNickname() {
+            const input = document.getElementById('nicknameInput');
+            const nickname = input.value.trim();
+            if (nickname) {
+                currentUser = nickname;
+                currentUserKey = generateUniqueKey();
+                localStorage.setItem('mmessenger_user_key', currentUserKey);
+                
+                const userData = {
+                    username: nickname,
+                    chats: [{id: 1, name: 'Избранное', type: 'favorites', messages: []}],
+                    friends: []
+                };
+                localStorage.setItem(`mmessenger_user_${currentUserKey}`, JSON.stringify(userData));
+                
+                chats = userData.chats;
+                friends = userData.friends;
+                renderChatList();
+                gsap.to('#welcomeScreen', {
+                    opacity: 0,
+                    duration: 0.3,
+                    onComplete: () => showScreen('chatsScreen')
+                });
+            }
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const screen = document.getElementById(screenId);
+            screen.classList.add('active');
+            gsap.from(screen, {x: 100, opacity: 0, duration: 0.4, ease: 'power2.out'});
+        }
+
+        function loadChats() {
+            if (currentUserKey) {
+                const userData = localStorage.getItem(`mmessenger_user_${currentUserKey}`);
+                if (userData) {
+                    const data = JSON.parse(userData);
+                    chats = data.chats || [{id: 1, name: 'Избранное', type: 'favorites', messages: []}];
+                    friends = data.friends || [];
+                }
+            }
+            renderChatList();
+        }
+
+        function saveChats() {
+            if (currentUserKey) {
+                const userData = localStorage.getItem(`mmessenger_user_${currentUserKey}`);
+                if (userData) {
+                    const data = JSON.parse(userData);
+                    data.chats = chats;
+                    data.friends = friends;
+                    localStorage.setItem(`mmessenger_user_${currentUserKey}`, JSON.stringify(data));
+                }
+            }
+        }
+
+        function renderChatList() {
+            const list = document.getElementById('chatList');
+            list.innerHTML = '';
+            chats.forEach(chat => {
+                const item = document.createElement('div');
+                item.className = 'chat-item';
+                const lastMsg = chat.messages[chat.messages.length - 1];
+                const chatIcon = chat.type === 'private' ? '👤' : '💬';
+                item.innerHTML = `
+                    <div class="chat-avatar">${chatIcon}</div>
+                    <div class="chat-info">
+                        <div class="chat-name">${chat.name}</div>
+                        <div class="chat-preview">${lastMsg ? lastMsg.text.substring(0, 30) + '...' : 'Нет сообщений'}</div>
+                    </div>
+                `;
+                item.onclick = () => openChat(chat);
+                list.appendChild(item);
+            });
+        }
+
+        function openChat(chat) {
+            currentChat = chat;
+            document.getElementById('chatTitle').textContent = chat.name;
+            
+            // Очищаем индикатор печати при смене чата
+            stopTyping();
+            document.getElementById('typingIndicator').style.display = 'none';
+            
+            renderMessages();
+            gsap.from('#chatScreen', {x: 100, opacity: 0, duration: 0.4, ease: 'power2.out'});
+            showScreen('chatScreen');
+        }
+
+        function renderMessages() {
+            const container = document.getElementById('messagesContainer');
+            const typingIndicator = document.getElementById('typingIndicator');
+            
+            // Сохраняем индикатор печати
+            const typingDisplay = typingIndicator.style.display;
+            
+            container.innerHTML = '';
+            container.appendChild(typingIndicator); // Добавляем индикатор обратно
+            
+            currentChat.messages.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `message ${msg.author === currentUser ? 'own' : ''}`;
+                msgDiv.innerHTML = `
+                    ${msg.author !== currentUser ? `<div class="message-author">${msg.author}</div>` : ''}
+                    <div class="message-bubble">${msg.text}</div>
+                    <div class="message-time">${msg.time}</div>
+                `;
+                container.appendChild(msgDiv);
+                gsap.from(msgDiv, {opacity: 0, y: 20, duration: 0.3});
+            });
+            
+            // Восстанавливаем состояние индикатора печати
+            typingIndicator.style.display = typingDisplay;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            if (text && currentChat) {
+                const now = new Date();
+                const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+                currentChat.messages.push({
+                    author: currentUser,
+                    text: text,
+                    time: time
+                });
+                saveChats();
+                renderMessages();
+                input.value = '';
+                
+                // Останавливаем индикатор печати
+                stopTyping();
+            }
+        }
+
+        function backToChats() {
+            renderChatList();
+            gsap.from('#chatsScreen', {x: -100, opacity: 0, duration: 0.4, ease: 'power2.out'});
+            showScreen('chatsScreen');
+        }
+
+        function showNewChatModal() {
+            const modal = document.getElementById('newChatModal');
+            modal.classList.add('active');
+            gsap.from('.modal-content', {scale: 0.8, opacity: 0, duration: 0.3, ease: 'back.out'});
+        }
+
+        function closeModal() {
+            document.getElementById('newChatModal').classList.remove('active');
+            document.getElementById('newChatName').value = '';
+            document.getElementById('newChatDescription').value = '';
+        }
+
+        function showAccountModal() {
+            const modal = document.getElementById('accountModal');
+            document.getElementById('accountUsername').textContent = currentUser;
+            document.getElementById('accountKey').textContent = currentUserKey;
+            modal.classList.add('active');
+            gsap.from('.modal-content', {scale: 0.8, opacity: 0, duration: 0.3, ease: 'back.out'});
+        }
+
+        function closeAccountModal() {
+            document.getElementById('accountModal').classList.remove('active');
+        }
+
+        function copyKey() {
+            navigator.clipboard.writeText(currentUserKey).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = 'Скопировано!';
+                btn.style.background = 'linear-gradient(180deg, #4caf50 0%, #2e7d32 100%)';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = 'linear-gradient(180deg, #81c784 0%, #4caf50 50%, #388e3c 51%, #2e7d32 100%)';
+                }, 2000);
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('mmessenger_user_key');
+            currentUser = '';
+            currentUserKey = '';
+            chats = [];
+            showScreen('welcomeScreen');
+        }
+
+        function createChat() {
+            const input = document.getElementById('newChatName');
+            const name = input.value.trim();
+            if (name) {
+                const newChat = {
+                    id: Date.now(),
+                    name: name,
+                    messages: []
+                };
+                chats.push(newChat);
+                saveChats();
+                renderChatList();
+                closeModal();
+            }
+        }
+
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        document.getElementById('nicknameInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') saveNickname();
+        });
+
+        document.getElementById('newChatName').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') createChat();
+        });
+
+        // Функции для работы с друзьями
+        function showFriendsModal() {
+            closeAccountModal();
+            const modal = document.getElementById('friendsModal');
+            renderFriendsList();
+            modal.classList.add('active');
+            gsap.from('.modal-content', {scale: 0.8, opacity: 0, duration: 0.3, ease: 'back.out'});
+        }
+
+        function closeFriendsModal() {
+            document.getElementById('friendsModal').classList.remove('active');
+        }
+
+        function showSearchModal() {
+            closeFriendsModal();
+            const modal = document.getElementById('searchFriendsModal');
+            modal.classList.add('active');
+            gsap.from('.modal-content', {scale: 0.8, opacity: 0, duration: 0.3, ease: 'back.out'});
+        }
+
+        function closeSearchModal() {
+            document.getElementById('searchFriendsModal').classList.remove('active');
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchResults').innerHTML = '';
+        }
+
+        function renderFriendsList() {
+            const list = document.getElementById('friendsList');
+            list.innerHTML = '';
+            
+            if (friends.length === 0) {
+                list.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">У вас пока нет друзей</div>';
+                return;
+            }
+
+            friends.forEach(friend => {
+                const item = document.createElement('div');
+                item.className = 'friend-item';
+                item.innerHTML = `
+                    <div class="friend-info">
+                        <div class="friend-avatar">${friend.username[0].toUpperCase()}</div>
+                        <div class="friend-details">
+                            <div class="friend-name">${friend.username}</div>
+                            <div class="friend-status online">В сети</div>
+                        </div>
+                    </div>
+                    <button class="chat-btn" onclick="startChatWithFriend('${friend.key}', '${friend.username.replace(/'/g, "\\'")}')">Чат</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function searchUsers() {
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            const results = document.getElementById('searchResults');
+            results.innerHTML = '';
+
+            if (searchTerm.length < 2) {
+                results.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">Введите минимум 2 символа</div>';
+                return;
+            }
+
+            // Ищем всех пользователей в localStorage
+            const allUsers = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('mmessenger_user_') && key !== `mmessenger_user_${currentUserKey}`) {
+                    try {
+                        const userData = JSON.parse(localStorage.getItem(key));
+                        if (userData && userData.username) {
+                            const userKey = key.replace('mmessenger_user_', '');
+                            allUsers.push({
+                                username: userData.username,
+                                key: userKey
+                            });
+                        }
+                    } catch (error) {
+                        console.log('Ошибка при парсинге данных пользователя:', error);
+                    }
+                }
+            }
+
+            // Фильтруем по поисковому запросу
+            const filteredUsers = allUsers.filter(user => 
+                user.username.toLowerCase().includes(searchTerm)
+            );
+
+            if (filteredUsers.length === 0) {
+                results.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">Пользователи не найдены</div>';
+                return;
+            }
+
+            filteredUsers.forEach(user => {
+                const isAlreadyFriend = friends.some(friend => friend.key === user.key);
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.innerHTML = `
+                    <div class="search-result-avatar">${user.username[0].toUpperCase()}</div>
+                    <div class="search-result-info">
+                        <div class="search-result-name">${user.username}</div>
+                        <div class="search-result-key">${user.key}</div>
+                    </div>
+                    ${isAlreadyFriend ? 
+                        '<div style="color: #4caf50; font-size: 12px;">Уже в друзьях</div>' : 
+                        '<button class="add-friend-btn" onclick="addFriend(\'' + user.key + '\', \'' + user.username.replace(/'/g, "\\'") + '\')">Добавить</button>'
+                    }
+                `;
+                results.appendChild(item);
+            });
+        }
+
+        function addFriend(userKey, username) {
+            // Проверяем, не добавляем ли мы сами себя
+            if (userKey === currentUserKey) {
+                alert('Нельзя добавить самого себя в друзья!');
+                return;
+            }
+            
+            // Проверяем, не добавлен ли уже этот пользователь
+            if (friends.some(friend => friend.key === userKey)) {
+                return;
+            }
+
+            friends.push({
+                key: userKey,
+                username: username
+            });
+
+            saveChats();
+            searchUsers(); // Обновляем результаты поиска
+            
+            // Показываем уведомление об успешном добавлении
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'Добавлен!';
+            btn.style.background = 'linear-gradient(180deg, #4caf50 0%, #2e7d32 100%)';
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = 'linear-gradient(180deg, #81c784 0%, #4caf50 50%, #388e3c 51%, #2e7d32 100%)';
+            }, 2000);
+        }
+
+        function startChatWithFriend(friendKey, friendUsername) {
+            // Ищем существующий чат с этим другом
+            let chat = chats.find(c => c.type === 'private' && c.participants && c.participants.includes(friendKey));
+            
+            if (!chat) {
+                // Создаем новый приватный чат
+                chat = {
+                    id: Date.now(),
+                    name: friendUsername,
+                    type: 'private',
+                    participants: [currentUserKey, friendKey],
+                    messages: []
+                };
+                chats.push(chat);
+                saveChats();
+            }
+
+            closeFriendsModal();
+            openChat(chat);
+        }
+
+        // Функции для индикатора печати
+        function startTyping() {
+            if (!isTyping && currentChat) {
+                isTyping = true;
+                const typingIndicator = document.getElementById('typingIndicator');
+                typingIndicator.textContent = `${currentUser} печатает...`;
+                typingIndicator.style.display = 'block';
+                
+                // Симулируем отправку индикатора печати другим пользователям
+                simulateTypingIndicator();
+            }
+        }
+
+        function stopTyping() {
+            if (isTyping) {
+                isTyping = false;
+                const typingIndicator = document.getElementById('typingIndicator');
+                typingIndicator.style.display = 'none';
+                
+                if (typingTimeout) {
+                    clearTimeout(typingTimeout);
+                    typingTimeout = null;
+                }
+            }
+        }
+
+        function simulateTypingIndicator() {
+            // Симулируем получение индикатора печати от других пользователей
+            if (currentChat && currentChat.type === 'private') {
+                const otherParticipant = currentChat.participants.find(p => p !== currentUserKey);
+                if (otherParticipant) {
+                    // Находим имя другого участника
+                    try {
+                        const otherUserData = localStorage.getItem(`mmessenger_user_${otherParticipant}`);
+                        if (otherUserData) {
+                            const otherUser = JSON.parse(otherUserData);
+                            setTimeout(() => {
+                                if (Math.random() > 0.7) { // 30% шанс показать индикатор
+                                    showTypingFromOther(otherUser.username);
+                                }
+                            }, 1000 + Math.random() * 2000);
+                        }
+                    } catch (error) {
+                        console.log('Ошибка при получении данных пользователя:', error);
+                    }
+                }
+            }
+        }
+
+        function showTypingFromOther(username) {
+            const typingIndicator = document.getElementById('typingIndicator');
+            typingIndicator.textContent = `${username} печатает...`;
+            typingIndicator.style.display = 'block';
+            
+            setTimeout(() => {
+                typingIndicator.style.display = 'none';
+            }, 2000 + Math.random() * 3000);
+        }
+
+        // Обработчики событий для индикатора печати
+        document.getElementById('messageInput').addEventListener('input', () => {
+            if (typingTimeout) {
+                clearTimeout(typingTimeout);
+            }
+            
+            startTyping();
+            
+            typingTimeout = setTimeout(() => {
+                stopTyping();
+            }, 1000);
+        });
+
+        document.getElementById('searchInput').addEventListener('input', searchUsers);
+
+        init();
+    </script>
 </body>
 </html>

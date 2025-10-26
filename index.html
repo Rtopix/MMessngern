@@ -15,7 +15,7 @@
             <div class="input-container">
                 <div class="input-label">Введите ваше имя:</div>
                 <input type="text" class="text-input" id="nicknameInput" placeholder="Ваше имя">
-                <button class="primary-btn" onclick="app.saveNickname()">Начать</button>
+                <button class="btn primary-btn" onclick="app.saveNickname()">Начать</button>
             </div>
         </div>
     </div>
@@ -23,22 +23,22 @@
     <!-- Chats Screen -->
     <div class="screen" id="chatsScreen">
         <div class="navbar">
-            <button class="nav-btn logout-btn" onclick="app.logout()">Выход</button>
+            <button class="btn nav-btn logout-btn" onclick="app.logout()">Выход</button>
             <div class="nav-title">Чаты</div>
             <div class="nav-actions">
-                <button class="nav-btn" onclick="app.refreshChats()" title="Обновить чаты">🔄</button>
-                <button class="nav-btn" onclick="app.showSearchModal()" title="Поиск друзей">🔍</button>
-                <button class="nav-btn" onclick="app.showAccountModal()" title="Аккаунт">👤</button>
+                <button class="btn nav-btn" onclick="app.refreshChats()" title="Обновить чаты">🔄</button>
+                <button class="btn nav-btn" onclick="app.showSearchModal()" title="Поиск друзей">🔍</button>
+                <button class="btn nav-btn" onclick="app.showAccountModal()" title="Аккаунт">👤</button>
             </div>
         </div>
         <div class="content chat-list" id="chatList"></div>
-        <div class="fab" onclick="app.showNewChatModal()">+</div>
+        <div class="btn fab" onclick="app.showNewChatModal()">+</div>
     </div>
 
     <!-- Chat Screen -->
     <div class="screen" id="chatScreen">
         <div class="navbar">
-            <button class="nav-btn" onclick="app.backToChats()">← Назад</button>
+            <button class="btn nav-btn" onclick="app.backToChats()">← Назад</button>
             <div class="nav-title" id="chatTitle"></div>
             <div class="nav-spacer"></div>
         </div>
@@ -47,7 +47,7 @@
         </div>
         <div class="message-input-container">
             <input type="text" class="message-input" id="messageInput" placeholder="Сообщение">
-            <button class="send-btn" onclick="app.sendMessage()">Отправить</button>
+            <button class="btn send-btn" onclick="app.sendMessage()">Отправить</button>
         </div>
     </div>
 
@@ -58,8 +58,8 @@
             <input type="text" class="text-input" id="newChatName" placeholder="Название канала">
             <textarea class="text-input" id="newChatDescription" placeholder="Описание канала" rows="3"></textarea>
             <div class="modal-buttons">
-                <button class="modal-btn cancel" onclick="app.closeModal()">Отмена</button>
-                <button class="modal-btn confirm" onclick="app.createChat()">Создать</button>
+                <button class="btn modal-btn cancel" onclick="app.closeModal()">Отмена</button>
+                <button class="btn modal-btn confirm" onclick="app.createChat()">Создать</button>
             </div>
         </div>
     </div>
@@ -75,13 +75,13 @@
                 <div class="account-field">
                     <label class="field-label">Уникальный ключ:</label>
                     <div class="field-value key-value" id="accountKey"></div>
-                    <button class="copy-btn" onclick="app.copyKey()">Копировать</button>
+                    <button class="btn copy-btn" onclick="app.copyKey()">Копировать</button>
                 </div>
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn confirm" onclick="app.showFriendsModal()">Друзья</button>
-                <button class="modal-btn confirm" onclick="app.showRestoreModal()">Восстановить чаты</button>
-                <button class="modal-btn confirm" onclick="app.closeAccountModal()">Закрыть</button>
+                <button class="btn modal-btn confirm" onclick="app.showFriendsModal()">Друзья</button>
+                <button class="btn modal-btn confirm" onclick="app.showRestoreModal()">Восстановить чаты</button>
+                <button class="btn modal-btn confirm" onclick="app.closeAccountModal()">Закрыть</button>
             </div>
         </div>
     </div>
@@ -92,7 +92,7 @@
             <input type="text" class="text-input" id="searchInput" placeholder="Введите ник пользователя">
             <div class="search-results" id="searchResults"></div>
             <div class="modal-buttons">
-                <button class="modal-btn cancel" onclick="app.closeSearchModal()">Отмена</button>
+                <button class="btn modal-btn cancel" onclick="app.closeSearchModal()">Отмена</button>
             </div>
         </div>
     </div>
@@ -102,8 +102,8 @@
             <div class="modal-title">Мои друзья</div>
             <div class="friends-list" id="friendsList"></div>
             <div class="modal-buttons">
-                <button class="modal-btn confirm" onclick="app.showSearchModal()">Найти друзей</button>
-                <button class="modal-btn cancel" onclick="app.closeFriendsModal()">Закрыть</button>
+                <button class="btn modal-btn confirm" onclick="app.showSearchModal()">Найти друзей</button>
+                <button class="btn modal-btn cancel" onclick="app.closeFriendsModal()">Закрыть</button>
             </div>
         </div>
     </div>
@@ -114,8 +114,8 @@
             <div class="input-label">Введите ваш уникальный ключ:</div>
             <input type="text" class="text-input" id="restoreKeyInput" placeholder="Ваш ключ">
             <div class="modal-buttons">
-                <button class="modal-btn cancel" onclick="app.closeRestoreModal()">Отмена</button>
-                <button class="modal-btn confirm" onclick="app.restoreChats()">Восстановить</button>
+                <button class="btn modal-btn cancel" onclick="app.closeRestoreModal()">Отмена</button>
+                <button class="btn modal-btn confirm" onclick="app.restoreChats()">Восстановить</button>
             </div>
         </div>
     </div>

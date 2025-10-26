@@ -115,7 +115,21 @@ body::before {
     width: 70px;
 }
 
-/* Buttons */
+/* Buttons - Base Styles */
+.btn {
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-family: inherit;
+    position: relative;
+    z-index: 1;
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+/* Navigation Buttons */
 .nav-btn {
     background: linear-gradient(180deg, var(--secondary-color) 0%, #2e88c4 50%, #1976b8 51%, var(--secondary-dark) 100%);
     border: 1px solid #0d47a1;
@@ -126,14 +140,9 @@ body::before {
     font-weight: bold;
     text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
     box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset, 0 1px 2px rgba(0,0,0,0.3);
-    cursor: pointer;
-    position: relative;
-    z-index: 1;
-    transition: var(--transition);
 }
 
 .nav-btn:active {
-    transform: scale(0.97);
     box-shadow: 0 1px 2px rgba(0,0,0,0.4) inset;
 }
 
@@ -349,6 +358,7 @@ body::before {
     border-color: var(--primary-color);
 }
 
+/* Send Button */
 .send-btn {
     background: linear-gradient(180deg, var(--secondary-color) 0%, #2e88c4 50%, #1976b8 51%, var(--secondary-dark) 100%);
     border: 1px solid #0d47a1;
@@ -359,12 +369,9 @@ body::before {
     font-weight: bold;
     text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
     box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset, var(--shadow-medium);
-    cursor: pointer;
-    transition: var(--transition);
 }
 
 .send-btn:active {
-    transform: scale(0.97);
     box-shadow: 0 1px 2px rgba(0,0,0,0.4) inset;
 }
 
@@ -444,8 +451,8 @@ body::before {
     border-color: var(--primary-color);
 }
 
+/* Primary Action Buttons */
 .primary-btn {
-    width: 100%;
     background: linear-gradient(180deg, var(--secondary-color) 0%, #2e88c4 50%, #1976b8 51%, var(--secondary-dark) 100%);
     border: 1px solid #0d47a1;
     border-radius: 10px;
@@ -455,12 +462,10 @@ body::before {
     font-weight: bold;
     text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
     box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset, 0 3px 6px rgba(0,0,0,0.3);
-    cursor: pointer;
-    transition: var(--transition);
+    width: 100%;
 }
 
 .primary-btn:active {
-    transform: scale(0.98);
     box-shadow: 0 2px 4px rgba(0,0,0,0.4) inset;
 }
 
@@ -479,13 +484,7 @@ body::before {
     color: #fff;
     font-size: 28px;
     box-shadow: var(--shadow-medium), 0 1px 0 rgba(255,255,255,0.3) inset;
-    cursor: pointer;
     z-index: 10;
-    transition: var(--transition);
-}
-
-.fab:active {
-    transform: scale(0.95);
 }
 
 /* Modals */
@@ -530,15 +529,14 @@ body::before {
     margin-top: 15px;
 }
 
+/* Modal Buttons */
 .modal-btn {
     flex: 1;
     padding: 10px;
     border-radius: var(--border-radius);
     font-size: 16px;
     font-weight: bold;
-    cursor: pointer;
     text-align: center;
-    transition: var(--transition);
 }
 
 .modal-btn.cancel {
@@ -558,7 +556,7 @@ body::before {
 }
 
 .modal-btn:active {
-    transform: scale(0.97);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4) inset;
 }
 
 /* Account info */
@@ -597,6 +595,7 @@ body::before {
     border-color: #90a4ae;
 }
 
+/* Secondary Action Buttons */
 .copy-btn {
     background: linear-gradient(180deg, #81c784 0%, var(--success-color) 50%, #388e3c 51%, var(--success-dark) 100%);
     border: 1px solid #1b5e20;
@@ -607,13 +606,10 @@ body::before {
     font-weight: bold;
     text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
     box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, var(--shadow-medium);
-    cursor: pointer;
     margin-top: 8px;
-    transition: var(--transition);
 }
 
 .copy-btn:active {
-    transform: scale(0.97);
     box-shadow: 0 1px 2px rgba(0,0,0,0.4) inset;
 }
 
@@ -684,12 +680,9 @@ body::before {
     font-weight: bold;
     text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
     box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, var(--shadow-medium);
-    cursor: pointer;
-    transition: var(--transition);
 }
 
 .add-friend-btn:active {
-    transform: scale(0.97);
     box-shadow: 0 1px 2px rgba(0,0,0,0.4) inset;
 }
 
@@ -787,11 +780,8 @@ body::before {
     font-weight: bold;
     text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
     box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, var(--shadow-medium);
-    cursor: pointer;
-    transition: var(--transition);
 }
 
 .chat-btn:active {
-    transform: scale(0.97);
     box-shadow: 0 1px 2px rgba(0,0,0,0.4) inset;
 }

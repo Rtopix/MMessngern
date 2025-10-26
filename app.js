@@ -465,7 +465,7 @@ class UIManager {
                         <div class="friend-status online">В сети</div>
                     </div>
                 </div>
-                <button class="chat-btn" onclick="app.startChatWithFriend('${friend.key}', '${this.escapeHtml(friend.username).replace(/'/g, "\\'")}')">Чат</button>
+                <button class="btn chat-btn" onclick="app.startChatWithFriend('${friend.key}', '${this.escapeHtml(friend.username).replace(/'/g, "\\'")}')">Чат</button>
             `;
             list.appendChild(item);
         });
@@ -500,7 +500,7 @@ class UIManager {
                 </div>
                 ${isAlreadyFriend ? 
                     '<div style="color: #4caf50; font-size: 12px;">Уже в друзьях</div>' : 
-                    `<button class="add-friend-btn" onclick="app.addFriend('${user.key}', '${this.escapeHtml(user.username).replace(/'/g, "\\'")}')">Добавить</button>`
+                    `<button class="btn add-friend-btn" onclick="app.addFriend('${user.key}', '${this.escapeHtml(user.username).replace(/'/g, "\\'")}')">Добавить</button>`
                 }
             `;
             results.appendChild(item);

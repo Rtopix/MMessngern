@@ -46,6 +46,8 @@
             <div class="typing-indicator" id="typingIndicator"></div>
         </div>
         <div class="message-input-container">
+            <input type="file" id="fileInput" style="display: none;" accept="image/*,video/*,*/*" onchange="app.handleFileSelect(event)">
+            <button class="btn file-attach-btn" onclick="document.getElementById('fileInput').click()" title="Прикрепить файл">📎</button>
             <input type="text" class="message-input" id="messageInput" placeholder="Сообщение">
             <button class="btn send-btn" onclick="app.sendMessage()">Отправить</button>
         </div>
@@ -79,7 +81,9 @@
                 </div>
             </div>
             <div class="modal-buttons">
-                <button class="btn modal-btn confirm" onclick="app.showFriendsModal()">Друзья</button>
+                <button class="btn modal-btn confirm" id="friendsModalBtn" onclick="app.showFriendsModal()">
+                    Друзья <span class="badge" id="requestsBadge" style="display: none;">0</span>
+                </button>
                 <button class="btn modal-btn confirm" onclick="app.showRestoreModal()">Восстановить чаты</button>
                 <button class="btn modal-btn confirm" onclick="app.closeAccountModal()">Закрыть</button>
             </div>
@@ -102,8 +106,19 @@
             <div class="modal-title">Мои друзья</div>
             <div class="friends-list" id="friendsList"></div>
             <div class="modal-buttons">
+                <button class="btn modal-btn confirm" onclick="app.showFriendRequestsModal()">Заявки в друзья</button>
                 <button class="btn modal-btn confirm" onclick="app.showSearchModal()">Найти друзей</button>
                 <button class="btn modal-btn cancel" onclick="app.closeFriendsModal()">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="friendRequestsModal">
+        <div class="modal-content">
+            <div class="modal-title">Заявки в друзья</div>
+            <div class="friends-list" id="friendRequestsList"></div>
+            <div class="modal-buttons">
+                <button class="btn modal-btn cancel" onclick="app.closeFriendRequestsModal()">Закрыть</button>
             </div>
         </div>
     </div>

@@ -267,6 +267,24 @@ body::before {
     word-wrap: break-word;
 }
 
+.message-bubble img,
+.message-bubble video {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.message-bubble a {
+    color: inherit;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.message-bubble a:hover {
+    opacity: 0.8;
+}
+
 .message.own .message-bubble {
     background: linear-gradient(180deg, #5dc1f6 0%, #2ea5e0 50%, #1a8fcb 51%, #0d7bb5 100%);
     color: #fff;
@@ -784,4 +802,65 @@ body::before {
 
 .chat-btn:active {
     box-shadow: 0 1px 2px rgba(0,0,0,0.4) inset;
+}
+
+/* File attachment button */
+.file-attach-btn {
+    background: linear-gradient(180deg, #90a4ae 0%, #607d8b 50%, #455a64 51%, #37474f 100%);
+    border: 1px solid #263238;
+    border-radius: var(--border-radius-large);
+    padding: 8px 15px;
+    color: #fff;
+    font-size: 18px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, var(--shadow-medium);
+}
+
+.file-attach-btn:active {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4) inset;
+}
+
+/* Accept/Reject buttons */
+.accept-btn {
+    background: linear-gradient(180deg, #81c784 0%, var(--success-color) 50%, #388e3c 51%, var(--success-dark) 100%);
+    border: 1px solid #1b5e20;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, var(--shadow-medium);
+}
+
+.accept-btn:active {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4) inset;
+}
+
+.reject-btn {
+    background: linear-gradient(180deg, var(--danger-color) 0%, var(--danger-dark) 50%, #c62828 51%, #b71c1c 100%);
+    border: 1px solid #8d1a1a;
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, var(--shadow-medium);
+}
+
+.reject-btn:active {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4) inset;
+}
+
+/* Badge for notifications */
+.badge {
+    background: linear-gradient(180deg, #ff5722 0%, #d84315 50%, #bf360c 51%, #a52714 100%);
+    color: #fff;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 5px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    animation: pulse 2s infinite;
 }

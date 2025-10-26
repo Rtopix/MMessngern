@@ -75,8 +75,8 @@ class StorageManager {
     }
 
     /**
-     * Get all users from localStorage
-     * @returns {Array} Array of user objects
+     * Get all users from localStorage (without exposing keys)
+     * @returns {Array} Array of user objects (username only, no key)
      */
     getAllUsers() {
         const users = [];
@@ -88,12 +88,32 @@ class StorageManager {
                 if (userData && userData.username) {
                     users.push({
                         username: userData.username,
-                        key: userKey
+                        key: userKey, // Keep for internal use, but not displayed
+                        searchKey: userData.username.toLowerCase() // For search
                     });
                 }
             }
         }
         return users;
+    }
+
+    /**
+     * Get user key by username (for internal use only)
+     * @param {string} username - Username to find
+     * @returns {string|null} User key or null
+     */
+    getUserKeyByUsername(username) {
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith(this.USER_KEY_PREFIX)) {
+                const userKey = key.replace(this.USER_KEY_PREFIX, '');
+                const userData = this.loadUserData(userKey);
+                if (userData && userData.username === username) {
+                    return userKey;
+                }
+            }
+        }
+        return null;
     }
 }
 
@@ -102,6 +122,8 @@ class ChatManager {
         this.storage = storageManager;
         this.chats = [];
         this.friends = [];
+        this.friendRequests = []; // Входящие заявки в друзья
+        this.sentFriendRequests = []; // Исходящие заявки
     }
 
     /**
@@ -126,6 +148,8 @@ class ChatManager {
         if (userData) {
             this.chats = userData.chats || this.initializeChats();
             this.friends = userData.friends || [];
+            this.friendRequests = userData.friendRequests || [];
+            this.sentFriendRequests = userData.sentFriendRequests || [];
             
             // Filter out invalid chats
             this.chats = this.chats.filter(chat => 
@@ -138,6 +162,8 @@ class ChatManager {
         } else {
             this.chats = this.initializeChats();
             this.friends = [];
+            this.friendRequests = [];
+            this.sentFriendRequests = [];
         }
     }
 
@@ -150,7 +176,9 @@ class ChatManager {
         const userData = {
             username: username,
             chats: this.chats,
-            friends: this.friends
+            friends: this.friends,
+            friendRequests: this.friendRequests,
+            sentFriendRequests: this.sentFriendRequests
         };
         this.storage.saveUserData(userKey, userData);
     }
@@ -211,8 +239,11 @@ class ChatManager {
      * @param {Object} chat - Chat object
      * @param {string} author - Message author
      * @param {string} text - Message text
+     * @param {string} type - Message type (text, image, video, file)
+     * @param {string} fileData - File data (base64 for images/videos, URL for files)
+     * @param {string} fileName - File name
      */
-    addMessage(chat, author, text) {
+    addMessage(chat, author, text, type = 'text', fileData = null, fileName = null) {
         if (!chat.messages) {
             chat.messages = [];
         }
@@ -220,17 +251,24 @@ class ChatManager {
         const now = new Date();
         const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
-        chat.messages.push({
+        const message = {
             author: author,
             text: text.trim(),
             time: time,
-            timestamp: now.toISOString()
-        });
+            timestamp: now.toISOString(),
+            type: type,
+            fileData: fileData,
+            fileName: fileName
+        };
+
+        chat.messages.push(message);
 
         // Keep only last 1000 messages for performance
         if (chat.messages.length > 1000) {
             chat.messages = chat.messages.slice(-1000);
         }
+
+        return message;
     }
 
     /**
@@ -265,6 +303,89 @@ class ChatManager {
             user.username.toLowerCase().includes(searchTerm.toLowerCase())
         );
         return filteredUsers;
+    }
+
+    /**
+     * Send friend request
+     * @param {string} targetUserKey - Target user's key
+     * @param {string} currentUserKey - Current user's key
+     * @param {string} currentUsername - Current username
+     * @returns {boolean} True if request was sent
+     */
+    sendFriendRequest(targetUserKey, currentUserKey, currentUsername) {
+        // Check if already sent
+        if (this.sentFriendRequests.some(req => req.key === targetUserKey)) {
+            return false;
+        }
+
+        // Add to sent requests
+        this.sentFriendRequests.push({
+            key: targetUserKey,
+            username: currentUsername,
+            sentAt: new Date().toISOString()
+        });
+
+        // Add to target user's incoming requests
+        const targetUserData = this.storage.loadUserData(targetUserKey);
+        if (targetUserData) {
+            if (!targetUserData.friendRequests) {
+                targetUserData.friendRequests = [];
+            }
+            targetUserData.friendRequests.push({
+                key: currentUserKey,
+                username: currentUsername,
+                sentAt: new Date().toISOString()
+            });
+            this.storage.saveUserData(targetUserKey, targetUserData);
+        }
+
+        return true;
+    }
+
+    /**
+     * Accept friend request
+     * @param {string} requesterKey - Requester's key
+     * @param {string} requesterUsername - Requester's username
+     * @param {string} currentUserKey - Current user's key
+     * @param {string} currentUsername - Current username
+     */
+    acceptFriendRequest(requesterKey, requesterUsername, currentUserKey, currentUsername) {
+        // Add to friends
+        this.addFriend(requesterKey, requesterUsername);
+
+        // Remove from friend requests
+        this.friendRequests = this.friendRequests.filter(req => req.key !== requesterKey);
+
+        // Update requester's data
+        const requesterData = this.storage.loadUserData(requesterKey);
+        if (requesterData) {
+            // Remove from requester's sent requests
+            if (requesterData.sentFriendRequests) {
+                requesterData.sentFriendRequests = requesterData.sentFriendRequests.filter(
+                    req => req.key !== currentUserKey
+                );
+            }
+            // Add us to requester's friends
+            if (!requesterData.friends) {
+                requesterData.friends = [];
+            }
+            if (!requesterData.friends.some(f => f.key === currentUserKey)) {
+                requesterData.friends.push({
+                    key: currentUserKey,
+                    username: currentUsername,
+                    addedAt: new Date().toISOString()
+                });
+            }
+            this.storage.saveUserData(requesterKey, requesterData);
+        }
+    }
+
+    /**
+     * Reject friend request
+     * @param {string} requesterKey - Requester's key
+     */
+    rejectFriendRequest(requesterKey) {
+        this.friendRequests = this.friendRequests.filter(req => req.key !== requesterKey);
     }
 }
 
@@ -409,22 +530,44 @@ class UIManager {
         const messagesToShow = chat.messages.slice(-100);
 
         messagesToShow.forEach((msg, index) => {
-            if (!msg || !msg.text || !msg.author) return;
+            if (!msg || !msg.author) return;
 
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${msg.author === currentUser ? 'own' : ''}`;
             
+            let content = '';
+            
+            // Handle different message types
+            if (msg.type === 'image' && msg.fileData) {
+                content = `<img src="${msg.fileData}" alt="Изображение" style="max-width: 300px; max-height: 300px; border-radius: 10px; margin-bottom: 5px;"><br><span style="font-size: 12px;">${this.escapeHtml(msg.fileName || 'Изображение')}</span>`;
+            } else if (msg.type === 'video' && msg.fileData) {
+                content = `<video controls style="max-width: 300px; max-height: 300px; border-radius: 10px; margin-bottom: 5px;"><source src="${msg.fileData}"></video><br><span style="font-size: 12px;">${this.escapeHtml(msg.fileName || 'Видео')}</span>`;
+            } else if (msg.type === 'file' && msg.fileData) {
+                content = `<div style="padding: 10px; background: rgba(0,0,0,0.1); border-radius: 5px;"><a href="${msg.fileData}" download="${this.escapeHtml(msg.fileName || 'file')}" style="color: inherit; text-decoration: none;">📎 ${this.escapeHtml(msg.fileName || 'Файл')}</a></div>`;
+            }
+            
+            // Add text if exists
+            if (msg.text) {
+                content += `<div>${this.escapeHtml(msg.text)}</div>`;
+            }
+            
             msgDiv.innerHTML = `
                 ${msg.author !== currentUser ? `<div class="message-author">${this.escapeHtml(msg.author)}</div>` : ''}
-                <div class="message-bubble">${this.escapeHtml(msg.text)}</div>
+                <div class="message-bubble">${content}</div>
                 <div class="message-time">${msg.time || '00:00'}</div>
             `;
             
             container.appendChild(msgDiv);
 
-            // Animate last 10 messages
-            if (index >= messagesToShow.length - 10 && window.gsap) {
-                gsap.from(msgDiv, { opacity: 0, y: 20, duration: 0.3 });
+            // Animate all messages with stagger effect
+            if (window.gsap) {
+                gsap.from(msgDiv, { 
+                    opacity: 0, 
+                    y: 20, 
+                    duration: 0.3,
+                    delay: index * 0.05,
+                    ease: 'back.out(1.7)' 
+                });
             }
         });
 
@@ -433,10 +576,18 @@ class UIManager {
             typingIndicator.style.display = typingDisplay;
         }
 
-        // Scroll to bottom
+        // Scroll to bottom with smooth animation
         setTimeout(() => {
             container.scrollTop = container.scrollHeight;
         }, 100);
+        
+        if (window.gsap) {
+            gsap.to(container, {
+                scrollTop: container.scrollHeight,
+                duration: 0.5,
+                ease: 'power2.out'
+            });
+        }
     }
 
     /**
@@ -475,8 +626,9 @@ class UIManager {
      * Render search results
      * @param {Array} users - Users array
      * @param {Array} friends - Current friends array
+     * @param {Array} sentRequests - Sent friend requests
      */
-    renderSearchResults(users, friends) {
+    renderSearchResults(users, friends, sentRequests = []) {
         const results = document.getElementById('searchResults');
         if (!results) return;
 
@@ -489,6 +641,7 @@ class UIManager {
 
         users.forEach(user => {
             const isAlreadyFriend = friends.some(friend => friend.key === user.key);
+            const requestSent = sentRequests.some(req => req.key === user.key);
             const item = document.createElement('div');
             item.className = 'search-result-item';
             
@@ -496,14 +649,50 @@ class UIManager {
                 <div class="search-result-avatar">${user.username[0].toUpperCase()}</div>
                 <div class="search-result-info">
                     <div class="search-result-name">${this.escapeHtml(user.username)}</div>
-                    <div class="search-result-key">${user.key}</div>
                 </div>
                 ${isAlreadyFriend ? 
                     '<div style="color: #4caf50; font-size: 12px;">Уже в друзьях</div>' : 
-                    `<button class="btn add-friend-btn" onclick="app.addFriend('${user.key}', '${this.escapeHtml(user.username).replace(/'/g, "\\'")}')">Добавить</button>`
+                    requestSent ?
+                    '<div style="color: #ffa726; font-size: 12px;">Заявка отправлена</div>' :
+                    `<button class="btn add-friend-btn" onclick="app.sendFriendRequestByName('${this.escapeHtml(user.username).replace(/'/g, "\\'")}')">Добавить в друзья</button>`
                 }
             `;
             results.appendChild(item);
+        });
+    }
+
+    /**
+     * Render friend requests
+     * @param {Array} requests - Friend requests array
+     */
+    renderFriendRequests(requests) {
+        const list = document.getElementById('friendRequestsList');
+        if (!list) return;
+
+        list.innerHTML = '';
+
+        if (requests.length === 0) {
+            list.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">Нет заявок в друзья</div>';
+            return;
+        }
+
+        requests.forEach(request => {
+            const item = document.createElement('div');
+            item.className = 'friend-item';
+            item.innerHTML = `
+                <div class="friend-info">
+                    <div class="friend-avatar">${this.escapeHtml(request.username)[0].toUpperCase()}</div>
+                    <div class="friend-details">
+                        <div class="friend-name">${this.escapeHtml(request.username)}</div>
+                        <div class="friend-status" style="color: #ffa726;">Заявка в друзья</div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button class="btn accept-btn" onclick="app.acceptFriendRequest('${request.key}', '${this.escapeHtml(request.username).replace(/'/g, "\\'")}')">✓</button>
+                    <button class="btn reject-btn" onclick="app.rejectFriendRequest('${request.key}')">✗</button>
+                </div>
+            `;
+            list.appendChild(item);
         });
     }
 
@@ -745,24 +934,95 @@ class MMessengerApp {
 
     /**
      * Send message
+     * @param {File} file - Optional file to send
      */
-    sendMessage() {
+    sendMessage(file = null) {
         const input = document.getElementById('messageInput');
         const text = input.value.trim();
         
-        if (!text || !this.currentChat) {
+        if (!text && !file) {
+            return;
+        }
+
+        if (!this.currentChat) {
             return;
         }
 
         try {
-            this.chatManager.addMessage(this.currentChat, this.currentUser, text);
-            this.saveUserData();
-            this.ui.renderMessages(this.currentChat, this.currentUser);
-            input.value = '';
-            this.stopTyping();
+            if (file) {
+                // Handle file upload
+                this.handleFileUpload(file, text);
+            } else {
+                // Send text message
+                this.chatManager.addMessage(this.currentChat, this.currentUser, text);
+                this.saveUserData();
+                this.ui.renderMessages(this.currentChat, this.currentUser);
+                input.value = '';
+                this.stopTyping();
+            }
         } catch (error) {
             console.error('Error sending message:', error);
             alert('Ошибка при отправке сообщения. Попробуйте еще раз.');
+        }
+    }
+
+    /**
+     * Handle file upload
+     * @param {File} file - File to upload
+     * @param {string} text - Optional text message
+     */
+    handleFileUpload(file, text = '') {
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+            const fileData = e.target.result;
+            const fileName = file.name;
+            let type = 'file';
+            
+            // Determine file type
+            if (file.type.startsWith('image/')) {
+                type = 'image';
+            } else if (file.type.startsWith('video/')) {
+                type = 'video';
+            }
+            
+            // Add message with file
+            this.chatManager.addMessage(
+                this.currentChat, 
+                this.currentUser, 
+                text, 
+                type, 
+                fileData, 
+                fileName
+            );
+            
+            this.saveUserData();
+            this.ui.renderMessages(this.currentChat, this.currentUser);
+            
+            // Clear input
+            document.getElementById('messageInput').value = '';
+            document.getElementById('fileInput').value = '';
+            this.stopTyping();
+        };
+        
+        reader.onerror = () => {
+            alert('Ошибка при чтении файла');
+        };
+        
+        // Read file as data URL
+        reader.readAsDataURL(file);
+    }
+
+    /**
+     * Handle file select from input
+     * @param {Event} event - File input change event
+     */
+    handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Get text from input
+            const text = document.getElementById('messageInput').value.trim();
+            this.handleFileUpload(file, text);
         }
     }
 
@@ -820,7 +1080,28 @@ class MMessengerApp {
     showAccountModal() {
         document.getElementById('accountUsername').textContent = this.currentUser;
         document.getElementById('accountKey').textContent = this.currentUserKey;
+        
+        // Update friend requests badge
+        this.updateFriendRequestsBadge();
+        
         this.ui.showModal('accountModal');
+    }
+
+    /**
+     * Update friend requests badge
+     */
+    updateFriendRequestsBadge() {
+        const badge = document.getElementById('requestsBadge');
+        const requestCount = this.chatManager.friendRequests ? this.chatManager.friendRequests.length : 0;
+        
+        if (badge) {
+            if (requestCount > 0) {
+                badge.textContent = requestCount;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
     }
 
     /**
@@ -878,6 +1159,8 @@ class MMessengerApp {
      */
     showFriendsModal() {
         this.closeAccountModal();
+        // Reload chats to get latest friend requests
+        this.chatManager.loadChats(this.currentUserKey);
         this.ui.renderFriendsList(this.chatManager.friends);
         this.ui.showModal('friendsModal');
     }
@@ -887,6 +1170,24 @@ class MMessengerApp {
      */
     closeFriendsModal() {
         this.ui.hideModal('friendsModal');
+    }
+
+    /**
+     * Show friend requests modal
+     */
+    showFriendRequestsModal() {
+        this.closeFriendsModal();
+        // Reload chats to get latest friend requests
+        this.chatManager.loadChats(this.currentUserKey);
+        this.ui.renderFriendRequests(this.chatManager.friendRequests);
+        this.ui.showModal('friendRequestsModal');
+    }
+
+    /**
+     * Close friend requests modal
+     */
+    closeFriendRequestsModal() {
+        this.ui.hideModal('friendRequestsModal');
     }
 
     /**
@@ -919,11 +1220,70 @@ class MMessengerApp {
         }
 
         const users = this.chatManager.searchUsers(searchTerm, this.currentUserKey);
-        this.ui.renderSearchResults(users, this.chatManager.friends);
+        this.ui.renderSearchResults(users, this.chatManager.friends, this.chatManager.sentFriendRequests);
     }
 
     /**
-     * Add friend
+     * Send friend request by username
+     * @param {string} username - Username to send request to
+     */
+    sendFriendRequestByName(username) {
+        const userKey = this.storage.getUserKeyByUsername(username);
+        
+        if (!userKey) {
+            alert('Пользователь не найден!');
+            return;
+        }
+
+        if (userKey === this.currentUserKey) {
+            alert('Нельзя отправить заявку самому себе!');
+            return;
+        }
+
+        if (this.chatManager.sendFriendRequest(userKey, this.currentUserKey, this.currentUser)) {
+            this.saveUserData();
+            this.searchUsers(); // Refresh search results
+            
+            const btn = event.target;
+            this.ui.showButtonFeedback(btn, 'Заявка отправлена!', 'linear-gradient(180deg, #ffa726 0%, #f57c00 100%)');
+        } else {
+            alert('Заявка уже отправлена этому пользователю!');
+        }
+    }
+
+    /**
+     * Accept friend request
+     * @param {string} requesterKey - Requester's key
+     * @param {string} requesterUsername - Requester's username
+     */
+    acceptFriendRequest(requesterKey, requesterUsername) {
+        this.chatManager.acceptFriendRequest(requesterKey, requesterUsername, this.currentUserKey, this.currentUser);
+        this.saveUserData();
+        
+        // Reload data to get updates
+        this.chatManager.loadChats(this.currentUserKey);
+        this.ui.renderFriendRequests(this.chatManager.friendRequests);
+        this.updateFriendRequestsBadge();
+        
+        alert(`${requesterUsername} добавлен в друзья!`);
+    }
+
+    /**
+     * Reject friend request
+     * @param {string} requesterKey - Requester's key
+     */
+    rejectFriendRequest(requesterKey) {
+        this.chatManager.rejectFriendRequest(requesterKey);
+        this.saveUserData();
+        
+        // Reload data
+        this.chatManager.loadChats(this.currentUserKey);
+        this.ui.renderFriendRequests(this.chatManager.friendRequests);
+        this.updateFriendRequestsBadge();
+    }
+
+    /**
+     * Add friend (legacy method for direct adding)
      * @param {string} userKey - User's unique key
      * @param {string} username - Username
      */

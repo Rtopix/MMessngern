@@ -9,6 +9,8 @@ class CloudStorageManager {
         this.MESSENGER_GIST_ID = 'mmessenger_users'; // Это будет ID вашего Gist
         this.USER_KEY_PREFIX = 'mmessenger_user_';
         this.CURRENT_USER_KEY = 'mmessenger_user_key';
+        this.CLOUD_USERS_KEY = 'mmessenger_cloud_users';
+        this.CLOUD_USERS_CACHE_TIME = 5 * 60 * 1000; // 5 минут кеш
     }
 
     /**
@@ -30,12 +32,114 @@ class CloudStorageManager {
      */
     async getAllUsers() {
         try {
-            // For now, fallback to localStorage
-            // In a real implementation, you would fetch from GitHub Gist API
+            // Try to get from cloud first
+            const cloudUsers = await this.getCloudUsers();
+            if (cloudUsers && cloudUsers.length > 0) {
+                return cloudUsers;
+            }
+            
+            // Fallback to localStorage
             return this.getAllUsersFromLocalStorage();
         } catch (error) {
             console.error('Error fetching users from cloud:', error);
             return this.getAllUsersFromLocalStorage();
+        }
+    }
+
+    /**
+     * Get users from cloud storage (GitHub Gist)
+     * @returns {Promise<Array>} Array of user objects
+     */
+    async getCloudUsers() {
+        try {
+            // Check cache first
+            const cached = this.getCachedCloudUsers();
+            if (cached) {
+                return cached;
+            }
+
+            // For demo purposes, we'll simulate cloud users
+            // In a real implementation, you would fetch from GitHub Gist API
+            const demoUsers = [
+                { username: 'Алексей', key: 'demo_key_1', searchKey: 'алексей' },
+                { username: 'Мария', key: 'demo_key_2', searchKey: 'мария' },
+                { username: 'Дмитрий', key: 'demo_key_3', searchKey: 'дмитрий' },
+                { username: 'Анна', key: 'demo_key_4', searchKey: 'анна' },
+                { username: 'Сергей', key: 'demo_key_5', searchKey: 'сергей' },
+                { username: 'Елена', key: 'demo_key_6', searchKey: 'елена' },
+                { username: 'Иван', key: 'demo_key_7', searchKey: 'иван' },
+                { username: 'Ольга', key: 'demo_key_8', searchKey: 'ольга' }
+            ];
+
+            // Cache the result
+            this.setCachedCloudUsers(demoUsers);
+            return demoUsers;
+
+        } catch (error) {
+            console.error('Error fetching cloud users:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Get cached cloud users
+     * @returns {Array|null} Cached users or null
+     */
+    getCachedCloudUsers() {
+        try {
+            const cached = localStorage.getItem(this.CLOUD_USERS_KEY);
+            if (!cached) return null;
+
+            const data = JSON.parse(cached);
+            const now = Date.now();
+            
+            // Check if cache is still valid
+            if (now - data.timestamp > this.CLOUD_USERS_CACHE_TIME) {
+                localStorage.removeItem(this.CLOUD_USERS_KEY);
+                return null;
+            }
+
+            return data.users;
+        } catch (error) {
+            console.error('Error getting cached cloud users:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Cache cloud users
+     * @param {Array} users - Users to cache
+     */
+    setCachedCloudUsers(users) {
+        try {
+            const data = {
+                users: users,
+                timestamp: Date.now()
+            };
+            localStorage.setItem(this.CLOUD_USERS_KEY, JSON.stringify(data));
+        } catch (error) {
+            console.error('Error caching cloud users:', error);
+        }
+    }
+
+    /**
+     * Register user in cloud storage
+     * @param {string} userKey - User's unique key
+     * @param {string} username - Username
+     * @returns {Promise<boolean>} Success status
+     */
+    async registerUserInCloud(userKey, username) {
+        try {
+            // In a real implementation, you would post to GitHub Gist API
+            console.log('Registering user in cloud:', { userKey, username });
+            
+            // For demo, we'll just log it
+            // In production, this would update the GitHub Gist with new user data
+            
+            return true;
+        } catch (error) {
+            console.error('Error registering user in cloud:', error);
+            return false;
         }
     }
 
@@ -67,9 +171,15 @@ class CloudStorageManager {
      * @param {string} userKey - User's unique key
      * @param {Object} userData - User data object
      */
-    saveUserData(userKey, userData) {
+    async saveUserData(userKey, userData) {
         try {
             localStorage.setItem(`${this.USER_KEY_PREFIX}${userKey}`, JSON.stringify(userData));
+            
+            // Register user in cloud storage
+            if (userData.username) {
+                await this.registerUserInCloud(userKey, userData.username);
+            }
+            
             // In a real implementation, you would also save to GitHub Gist
             this.saveToCloud(userKey, userData);
         } catch (error) {
@@ -171,8 +281,8 @@ class StorageManager {
      * @param {string} userKey - User's unique key
      * @param {Object} userData - User data object
      */
-    saveUserData(userKey, userData) {
-        return this.cloudStorage.saveUserData(userKey, userData);
+    async saveUserData(userKey, userData) {
+        return await this.cloudStorage.saveUserData(userKey, userData);
     }
 
     /**
@@ -402,10 +512,10 @@ class ChatManager {
      * Search users by username
      * @param {string} searchTerm - Search term
      * @param {string} currentUserKey - Current user's key to exclude from results
-     * @returns {Array} Filtered users array
+     * @returns {Promise<Array>} Filtered users array
      */
-    searchUsers(searchTerm, currentUserKey) {
-        const allUsers = this.storage.getAllUsers();
+    async searchUsers(searchTerm, currentUserKey) {
+        const allUsers = await this.storage.cloudStorage.getAllUsers();
         const filteredUsers = allUsers.filter(user => 
             user.key !== currentUserKey &&
             user.username.toLowerCase().includes(searchTerm.toLowerCase())
@@ -976,16 +1086,16 @@ class MMessengerApp {
         }
 
         // Auto-save every 30 seconds
-        setInterval(() => {
+        setInterval(async () => {
             if (this.currentUserKey && this.chatManager.chats.length > 0) {
-                this.saveUserData();
+                await this.saveUserData();
             }
         }, 30000);
 
         // Save before page unload
-        window.addEventListener('beforeunload', () => {
+        window.addEventListener('beforeunload', async () => {
             if (this.currentUserKey) {
-                this.saveUserData();
+                await this.saveUserData();
             }
         });
     }
@@ -1012,16 +1122,16 @@ class MMessengerApp {
     /**
      * Save user data to storage
      */
-    saveUserData() {
+    async saveUserData() {
         if (this.currentUserKey && this.currentUser) {
-            this.chatManager.saveChats(this.currentUserKey, this.currentUser);
+            await this.chatManager.saveChats(this.currentUserKey, this.currentUser);
         }
     }
 
     /**
      * Save nickname and create user
      */
-    saveNickname() {
+    async saveNickname() {
         const input = document.getElementById('nicknameInput');
         const nickname = input.value.trim();
         
@@ -1036,7 +1146,7 @@ class MMessengerApp {
 
         // Initialize user data
         this.chatManager.loadChats(this.currentUserKey);
-        this.saveUserData();
+        await this.saveUserData();
 
         // Show chats screen with animation
         if (window.gsap) {
@@ -1099,7 +1209,7 @@ class MMessengerApp {
             } else {
                 // Send text message
                 this.chatManager.addMessage(this.currentChat, this.currentUser, text);
-                this.saveUserData();
+                await this.saveUserData();
                 this.ui.renderMessages(this.currentChat, this.currentUser);
                 input.value = '';
                 this.stopTyping();
@@ -1140,7 +1250,7 @@ class MMessengerApp {
                 fileName
             );
             
-            this.saveUserData();
+            await this.saveUserData();
             this.ui.renderMessages(this.currentChat, this.currentUser);
             
             // Clear input
@@ -1209,7 +1319,7 @@ class MMessengerApp {
 
         try {
             this.chatManager.createChat(name, descInput.value);
-            this.saveUserData();
+            await this.saveUserData();
             this.ui.renderChatList(this.chatManager.chats);
             this.closeModal();
         } catch (error) {
@@ -1354,7 +1464,7 @@ class MMessengerApp {
     /**
      * Search users
      */
-    searchUsers() {
+    async searchUsers() {
         const searchTerm = document.getElementById('searchInput').value.trim();
         
         if (searchTerm.length < 2) {
@@ -1363,8 +1473,18 @@ class MMessengerApp {
             return;
         }
 
-        const users = this.chatManager.searchUsers(searchTerm, this.currentUserKey);
-        this.ui.renderSearchResults(users, this.chatManager.friends, this.chatManager.sentFriendRequests);
+        // Show loading indicator
+        document.getElementById('searchResults').innerHTML = 
+            '<div style="text-align: center; padding: 20px; color: #666;">Поиск пользователей...</div>';
+
+        try {
+            const users = await this.chatManager.searchUsers(searchTerm, this.currentUserKey);
+            this.ui.renderSearchResults(users, this.chatManager.friends, this.chatManager.sentFriendRequests);
+        } catch (error) {
+            console.error('Error searching users:', error);
+            document.getElementById('searchResults').innerHTML = 
+                '<div style="text-align: center; padding: 20px; color: #d32f2f;">Ошибка при поиске пользователей</div>';
+        }
     }
 
     /**
@@ -1385,7 +1505,7 @@ class MMessengerApp {
         }
 
         if (this.chatManager.sendFriendRequest(userKey, this.currentUserKey, this.currentUser)) {
-            this.saveUserData();
+            await this.saveUserData();
             this.searchUsers(); // Refresh search results
             
             const btn = event.target;
@@ -1400,9 +1520,9 @@ class MMessengerApp {
      * @param {string} requesterKey - Requester's key
      * @param {string} requesterUsername - Requester's username
      */
-    acceptFriendRequest(requesterKey, requesterUsername) {
+    async acceptFriendRequest(requesterKey, requesterUsername) {
         this.chatManager.acceptFriendRequest(requesterKey, requesterUsername, this.currentUserKey, this.currentUser);
-        this.saveUserData();
+        await this.saveUserData();
         
         // Reload data to get updates
         this.chatManager.loadChats(this.currentUserKey);
@@ -1416,9 +1536,9 @@ class MMessengerApp {
      * Reject friend request
      * @param {string} requesterKey - Requester's key
      */
-    rejectFriendRequest(requesterKey) {
+    async rejectFriendRequest(requesterKey) {
         this.chatManager.rejectFriendRequest(requesterKey);
-        this.saveUserData();
+        await this.saveUserData();
         
         // Reload data
         this.chatManager.loadChats(this.currentUserKey);
@@ -1438,7 +1558,7 @@ class MMessengerApp {
         }
 
         if (this.chatManager.addFriend(userKey, username)) {
-            this.saveUserData();
+            await this.saveUserData();
             this.searchUsers(); // Refresh search results
             
             const btn = event.target;
@@ -1456,7 +1576,7 @@ class MMessengerApp {
 
         if (!chat) {
             chat = this.chatManager.createPrivateChat(friendKey, friendUsername, this.currentUserKey);
-            this.saveUserData();
+            await this.saveUserData();
         }
 
         this.closeFriendsModal();
@@ -1634,7 +1754,7 @@ class MMessengerApp {
 
             // Try to add friend by key
             if (this.chatManager.addUserByKey(friendKey, friendName)) {
-                this.saveUserData();
+                await this.saveUserData();
                 this.closeAddFriendModal();
                 alert(`${friendName} успешно добавлен в друзья!`);
             } else {

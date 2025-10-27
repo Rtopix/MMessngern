@@ -1052,6 +1052,26 @@ class MMessengerApp {
             });
         }
 
+        // Add click handler for start button
+        const startButton = document.querySelector('.primary-btn');
+        if (startButton) {
+            console.log('Start button found, adding event listener');
+            startButton.addEventListener('click', async (e) => {
+                console.log('Start button event triggered');
+                e.preventDefault();
+                await this.handleStartClick();
+            });
+            
+            // Alternative: add onclick attribute as fallback
+            startButton.onclick = async (e) => {
+                console.log('Start button onclick triggered');
+                e.preventDefault();
+                await this.handleStartClick();
+            };
+        } else {
+            console.error('Start button not found!');
+        }
+
         const newChatName = document.getElementById('newChatName');
         if (newChatName) {
             newChatName.addEventListener('keypress', (e) => {
@@ -1131,7 +1151,8 @@ class MMessengerApp {
     /**
      * Handle start button click (wrapper for async function)
      */
-    async handleStartClick() {
+    handleStartClick = async () => {
+        console.log('Start button clicked!');
         await this.saveNickname();
     }
 
@@ -1139,8 +1160,11 @@ class MMessengerApp {
      * Save nickname and create user
      */
     async saveNickname() {
+        console.log('saveNickname called');
         const input = document.getElementById('nicknameInput');
         const nickname = input.value.trim();
+        
+        console.log('Nickname input value:', nickname);
         
         if (!nickname) {
             alert('Введите имя пользователя!');

@@ -2,7 +2,10 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>MMessenger</title>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -108,6 +111,7 @@
             <div class="modal-buttons">
                 <button class="btn modal-btn confirm" onclick="app.showFriendRequestsModal()">Заявки в друзья</button>
                 <button class="btn modal-btn confirm" onclick="app.showSearchModal()">Найти друзей</button>
+                <button class="btn modal-btn confirm" onclick="app.showAddFriendByKeyModal()">Добавить по ключу</button>
                 <button class="btn modal-btn cancel" onclick="app.closeFriendsModal()">Закрыть</button>
             </div>
         </div>
@@ -131,6 +135,20 @@
             <div class="modal-buttons">
                 <button class="btn modal-btn cancel" onclick="app.closeRestoreModal()">Отмена</button>
                 <button class="btn modal-btn confirm" onclick="app.restoreChats()">Восстановить</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="addFriendByKeyModal">
+        <div class="modal-content">
+            <div class="modal-title">Добавить друга по ключу</div>
+            <div class="input-label">Введите ключ друга:</div>
+            <input type="text" class="text-input" id="friendKeyInput" placeholder="Ключ друга">
+            <div class="input-label">Введите имя друга:</div>
+            <input type="text" class="text-input" id="friendNameInput" placeholder="Имя друга">
+            <div class="modal-buttons">
+                <button class="btn modal-btn cancel" onclick="app.closeAddFriendModal()">Отмена</button>
+                <button class="btn modal-btn confirm" onclick="app.addFriendByKey()">Добавить</button>
             </div>
         </div>
     </div>

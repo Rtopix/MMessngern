@@ -1,10 +1,12 @@
 /**
  * MMessenger - Professional Chat Application
- * Clean, modular JavaScript implementation
+ * Clean, modular JavaScript implementation with cloud storage
  */
 
-class StorageManager {
+class CloudStorageManager {
     constructor() {
+        this.GIST_API_URL = 'https://api.github.com/gists';
+        this.MESSENGER_GIST_ID = 'mmessenger_users'; // Это будет ID вашего Gist
         this.USER_KEY_PREFIX = 'mmessenger_user_';
         this.CURRENT_USER_KEY = 'mmessenger_user_key';
     }
@@ -23,6 +25,44 @@ class StorageManager {
     }
 
     /**
+     * Get all users from cloud storage
+     * @returns {Promise<Array>} Array of user objects
+     */
+    async getAllUsers() {
+        try {
+            // For now, fallback to localStorage
+            // In a real implementation, you would fetch from GitHub Gist API
+            return this.getAllUsersFromLocalStorage();
+        } catch (error) {
+            console.error('Error fetching users from cloud:', error);
+            return this.getAllUsersFromLocalStorage();
+        }
+    }
+
+    /**
+     * Get all users from localStorage (fallback)
+     * @returns {Array} Array of user objects
+     */
+    getAllUsersFromLocalStorage() {
+        const users = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith(this.USER_KEY_PREFIX)) {
+                const userKey = key.replace(this.USER_KEY_PREFIX, '');
+                const userData = this.loadUserData(userKey);
+                if (userData && userData.username) {
+                    users.push({
+                        username: userData.username,
+                        key: userKey,
+                        searchKey: userData.username.toLowerCase()
+                    });
+                }
+            }
+        }
+        return users;
+    }
+
+    /**
      * Save user data to localStorage
      * @param {string} userKey - User's unique key
      * @param {Object} userData - User data object
@@ -30,9 +70,26 @@ class StorageManager {
     saveUserData(userKey, userData) {
         try {
             localStorage.setItem(`${this.USER_KEY_PREFIX}${userKey}`, JSON.stringify(userData));
+            // In a real implementation, you would also save to GitHub Gist
+            this.saveToCloud(userKey, userData);
         } catch (error) {
             console.error('Error saving user data:', error);
             throw new Error('Failed to save user data');
+        }
+    }
+
+    /**
+     * Save user data to cloud storage (GitHub Gist)
+     * @param {string} userKey - User's unique key
+     * @param {Object} userData - User data object
+     */
+    async saveToCloud(userKey, userData) {
+        try {
+            // This is a placeholder for cloud storage
+            // In a real implementation, you would use GitHub Gist API
+            console.log('Saving to cloud:', userKey, userData);
+        } catch (error) {
+            console.error('Error saving to cloud:', error);
         }
     }
 
@@ -75,29 +132,6 @@ class StorageManager {
     }
 
     /**
-     * Get all users from localStorage (without exposing keys)
-     * @returns {Array} Array of user objects (username only, no key)
-     */
-    getAllUsers() {
-        const users = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key.startsWith(this.USER_KEY_PREFIX)) {
-                const userKey = key.replace(this.USER_KEY_PREFIX, '');
-                const userData = this.loadUserData(userKey);
-                if (userData && userData.username) {
-                    users.push({
-                        username: userData.username,
-                        key: userKey, // Keep for internal use, but not displayed
-                        searchKey: userData.username.toLowerCase() // For search
-                    });
-                }
-            }
-        }
-        return users;
-    }
-
-    /**
      * Get user key by username (for internal use only)
      * @param {string} username - Username to find
      * @returns {string|null} User key or null
@@ -114,6 +148,80 @@ class StorageManager {
             }
         }
         return null;
+    }
+}
+
+class StorageManager {
+    constructor() {
+        this.cloudStorage = new CloudStorageManager();
+        this.USER_KEY_PREFIX = 'mmessenger_user_';
+        this.CURRENT_USER_KEY = 'mmessenger_user_key';
+    }
+
+    /**
+     * Generate a unique 16-character key
+     * @returns {string} Unique key
+     */
+    generateUniqueKey() {
+        return this.cloudStorage.generateUniqueKey();
+    }
+
+    /**
+     * Save user data to localStorage
+     * @param {string} userKey - User's unique key
+     * @param {Object} userData - User data object
+     */
+    saveUserData(userKey, userData) {
+        return this.cloudStorage.saveUserData(userKey, userData);
+    }
+
+    /**
+     * Load user data from localStorage
+     * @param {string} userKey - User's unique key
+     * @returns {Object|null} User data or null if not found
+     */
+    loadUserData(userKey) {
+        return this.cloudStorage.loadUserData(userKey);
+    }
+
+    /**
+     * Get current user key from localStorage
+     * @returns {string|null} Current user key or null
+     */
+    getCurrentUserKey() {
+        return this.cloudStorage.getCurrentUserKey();
+    }
+
+    /**
+     * Set current user key in localStorage
+     * @param {string} userKey - User's unique key
+     */
+    setCurrentUserKey(userKey) {
+        return this.cloudStorage.setCurrentUserKey(userKey);
+    }
+
+    /**
+     * Remove current user data
+     */
+    clearCurrentUser() {
+        return this.cloudStorage.clearCurrentUser();
+    }
+
+    /**
+     * Get all users from localStorage (without exposing keys)
+     * @returns {Array} Array of user objects (username only, no key)
+     */
+    getAllUsers() {
+        return this.cloudStorage.getAllUsersFromLocalStorage();
+    }
+
+    /**
+     * Get user key by username (for internal use only)
+     * @param {string} username - Username to find
+     * @returns {string|null} User key or null
+     */
+    getUserKeyByUsername(username) {
+        return this.cloudStorage.getUserKeyByUsername(username);
     }
 }
 
@@ -303,6 +411,28 @@ class ChatManager {
             user.username.toLowerCase().includes(searchTerm.toLowerCase())
         );
         return filteredUsers;
+    }
+
+    /**
+     * Add user by key (for adding friends who shared their key)
+     * @param {string} userKey - User's unique key
+     * @param {string} username - Username
+     * @returns {boolean} True if user was added successfully
+     */
+    addUserByKey(userKey, username) {
+        try {
+            // Check if user exists in storage
+            const userData = this.storage.loadUserData(userKey);
+            if (!userData) {
+                return false;
+            }
+
+            // Add to friends
+            return this.addFriend(userKey, username);
+        } catch (error) {
+            console.error('Error adding user by key:', error);
+            return false;
+        }
     }
 
     /**
@@ -828,6 +958,20 @@ class MMessengerApp {
         if (restoreKeyInput) {
             restoreKeyInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') this.restoreChats();
+            });
+        }
+
+        const friendKeyInput = document.getElementById('friendKeyInput');
+        if (friendKeyInput) {
+            friendKeyInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.addFriendByKey();
+            });
+        }
+
+        const friendNameInput = document.getElementById('friendNameInput');
+        if (friendNameInput) {
+            friendNameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.addFriendByKey();
             });
         }
 
@@ -1442,6 +1586,63 @@ class MMessengerApp {
         } catch (error) {
             console.error('Error restoring data:', error);
             alert('Ошибка при восстановлении данных. Проверьте правильность ключа.');
+        }
+    }
+
+    /**
+     * Show add friend by key modal
+     */
+    showAddFriendByKeyModal() {
+        this.closeFriendsModal();
+        document.getElementById('friendKeyInput').value = '';
+        document.getElementById('friendNameInput').value = '';
+        this.ui.showModal('addFriendByKeyModal');
+    }
+
+    /**
+     * Close add friend modal
+     */
+    closeAddFriendModal() {
+        this.ui.hideModal('addFriendByKeyModal');
+    }
+
+    /**
+     * Add friend by key
+     */
+    addFriendByKey() {
+        const keyInput = document.getElementById('friendKeyInput');
+        const nameInput = document.getElementById('friendNameInput');
+        const friendKey = keyInput.value.trim();
+        const friendName = nameInput.value.trim();
+
+        if (!friendKey || !friendName) {
+            alert('Введите ключ и имя друга!');
+            return;
+        }
+
+        if (friendKey === this.currentUserKey) {
+            alert('Нельзя добавить самого себя в друзья!');
+            return;
+        }
+
+        try {
+            // Check if friend already exists
+            if (this.chatManager.friends.some(friend => friend.key === friendKey)) {
+                alert('Этот пользователь уже в ваших друзьях!');
+                return;
+            }
+
+            // Try to add friend by key
+            if (this.chatManager.addUserByKey(friendKey, friendName)) {
+                this.saveUserData();
+                this.closeAddFriendModal();
+                alert(`${friendName} успешно добавлен в друзья!`);
+            } else {
+                alert('Не удалось найти пользователя с таким ключом. Проверьте правильность ключа.');
+            }
+        } catch (error) {
+            console.error('Error adding friend by key:', error);
+            alert('Ошибка при добавлении друга. Проверьте правильность ключа.');
         }
     }
 }

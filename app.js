@@ -1047,8 +1047,8 @@ class MMessengerApp {
 
         const nicknameInput = document.getElementById('nicknameInput');
         if (nicknameInput) {
-            nicknameInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') this.saveNickname();
+            nicknameInput.addEventListener('keypress', async (e) => {
+                if (e.key === 'Enter') await this.handleStartClick();
             });
         }
 
@@ -1126,6 +1126,13 @@ class MMessengerApp {
         if (this.currentUserKey && this.currentUser) {
             await this.chatManager.saveChats(this.currentUserKey, this.currentUser);
         }
+    }
+
+    /**
+     * Handle start button click (wrapper for async function)
+     */
+    async handleStartClick() {
+        await this.saveNickname();
     }
 
     /**
